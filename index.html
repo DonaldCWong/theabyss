@@ -17,9 +17,12 @@
       }
       body {
         margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
+        min-height: 200vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 15vh;
+        background-color: #555555;
         color: #f7f1f1;
       }
       h1 {
@@ -33,6 +36,35 @@
   <body>
     <main>
       <h1>THE ABYSS</h1>
+      <p class="subtitle">Scroll if you are ready</p>
     </main>
+    <script>
+      (function () {
+        const startColor = { r: 85, g: 85, b: 85 }; // neutral gray
+        const endColor = { r: 10, g: 0, b: 0 }; // near-black, slightly red-tinted
+
+        function lerp(a, b, t) {
+          return a + (b - a) * t;
+        }
+
+        function updateBackground() {
+          const scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+          const docHeight =
+            document.documentElement.scrollHeight - window.innerHeight || 1;
+          const t = Math.min(Math.max(scrollTop / docHeight, 0), 1);
+
+          const r = Math.round(lerp(startColor.r, endColor.r, t));
+          const g = Math.round(lerp(startColor.g, endColor.g, t));
+          const b = Math.round(lerp(startColor.b, endColor.b, t));
+
+          document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        window.addEventListener("scroll", updateBackground, { passive: true });
+        window.addEventListener("resize", updateBackground);
+        updateBackground();
+      })();
+    </script>
   </body>
 </html>
