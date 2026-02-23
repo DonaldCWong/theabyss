@@ -25,11 +25,21 @@
         background-color: #555555;
         color: #f7f1f1;
       }
+      main {
+        text-align: center;
+      }
       h1 {
         margin: 0;
         font-family: "Nosifer", cursive;
         font-size: clamp(2.5rem, 10vw, 7rem);
         letter-spacing: 0.1em;
+      }
+      .subtitle {
+        margin-top: 1rem;
+        font-size: 1.25rem;
+        text-transform: uppercase;
+        color: #7c0d0d;
+        font-family: "Nosifer", cursive;
       }
     </style>
   </head>
@@ -40,6 +50,11 @@
     </main>
     <script>
       (function () {
+        if ("scrollRestoration" in window.history) {
+          window.history.scrollRestoration = "manual";
+        }
+        window.scrollTo(0, 0);
+
         const startColor = { r: 85, g: 85, b: 85 }; // neutral gray
         const endColor = { r: 10, g: 0, b: 0 }; // near-black, slightly red-tinted
 
