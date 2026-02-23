@@ -19,9 +19,9 @@
         margin: 0;
         min-height: 200vh;
         display: flex;
-        align-items: flex-start;
-        justify-content: center;
-        padding-top: 15vh;
+        flex-direction: column;
+        align-items: center;
+        padding: 15vh 1rem 0;
         background-color: #555555;
         color: #f7f1f1;
       }
@@ -41,6 +41,14 @@
         color: #7c0d0d;
         font-family: "Nosifer", cursive;
       }
+      .bottom-message {
+        font-family: "Nosifer", cursive;
+        color: #f7f1f1;
+        font-size: 2rem;
+        text-align: center;
+        margin-top: auto;
+        margin-bottom: 0.5rem;
+      }
     </style>
   </head>
   <body>
@@ -48,6 +56,9 @@
       <h1>THE ABYSS</h1>
       <p class="subtitle">Scroll if you are ready</p>
     </main>
+    <p class="bottom-message">
+      Congrats, you made it to the bottom. Was it all worth it?
+    </p>
     <script>
       (function () {
         if ("scrollRestoration" in window.history) {
