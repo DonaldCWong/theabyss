@@ -8,138 +8,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Nosifer&display=swap"
     />
-    <style>
-      :root {
-        color-scheme: dark;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        min-height: 4000vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 15vh 1rem 0;
-        background-color: #282a37;
-        color: #f7f1f1;
-      }
-      main {
-        text-align: center;
-      }
-      h1 {
-        margin: 0;
-        font-family: "Nosifer", cursive;
-        font-size: clamp(2.5rem, 10vw, 7rem);
-        letter-spacing: 0.1em;
-      }
-      .subtitle {
-        margin-top: 1rem;
-        font-size: 1.25rem;
-        text-transform: uppercase;
-        color: #7c0d0d;
-        font-family: "Nosifer", cursive;
-      }
-      .bottom-message {
-        font-family: "Nosifer", cursive;
-        color: #f7f1f1;
-        font-size: 2rem;
-        text-align: center;
-        margin-top: auto;
-        margin-bottom: 0.5rem;
-      }
-      .overlay {
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 1.25rem;
-        background: rgba(0, 0, 0, 0.72);
-        backdrop-filter: blur(6px);
-        z-index: 9999;
-      }
-      .overlay[aria-hidden="false"] {
-        display: flex;
-      }
-      .modal {
-        width: min(900px, 100%);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        background: rgba(10, 10, 14, 0.86);
-        box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
-        padding: 1.5rem 1.25rem;
-        text-align: center;
-      }
-      .modal-title {
-        font-family: "Nosifer", cursive;
-        font-size: 1.75rem;
-        color: #f7f1f1;
-        margin: 0 0 1rem;
-        letter-spacing: 0.08em;
-      }
-      .modal-body {
-        font-family: "Nosifer", cursive;
-        font-size: 1.1rem;
-        color: #f7f1f1;
-        margin: 0 0 1.25rem;
-        line-height: 1.6;
-      }
-      .modal-actions {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      .modal-actions button {
-        appearance: none;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(124, 13, 13, 0.25);
-        color: #f7f1f1;
-        font-family: "Nosifer", cursive;
-        font-size: 1rem;
-        padding: 0.75rem 1rem;
-        cursor: pointer;
-        letter-spacing: 0.08em;
-        transition: transform 120ms ease, background-color 120ms ease;
-      }
-      .modal-actions button:hover {
-        transform: translateY(-1px);
-        background: rgba(124, 13, 13, 0.38);
-      }
-      .modal-actions button:active {
-        transform: translateY(0);
-      }
-      body.glitching h1,
-      body.glitching .subtitle,
-      body.glitching .bottom-message {
-        animation: jitter 110ms infinite linear;
-        text-shadow: -2px 0 rgba(255, 0, 0, 0.75), 2px 0 rgba(0, 170, 255, 0.65);
-      }
-      body.glitching {
-        filter: contrast(1.15) saturate(1.25);
-      }
-      @keyframes jitter {
-        0% {
-          transform: translate(0, 0) skewX(0deg);
-        }
-        20% {
-          transform: translate(-1px, 1px) skewX(-2deg);
-        }
-        40% {
-          transform: translate(2px, -1px) skewX(2deg);
-        }
-        60% {
-          transform: translate(-2px, 0) skewX(-1deg);
-        }
-        80% {
-          transform: translate(1px, -2px) skewX(1deg);
-        }
-        100% {
-          transform: translate(0, 0) skewX(0deg);
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="/abyss.css" />
   </head>
   <body>
     <main>
@@ -164,7 +33,7 @@
         <div class="modal-actions">
           <button id="abyssReveal" type="button">Reveal</button>
           <button id="abyssSkip" type="button">Skip</button>
-          <button id="abyssContinue" type="button" style="display: none">
+          <button id="abyssContinue" type="button">
             Continue
           </button>
         </div>
