@@ -69,10 +69,17 @@
 
   let locked = false;
   let lockedY = 0;
-  let gateFired = false;
-  const gateKey = "abyss_gate_done_v1";
+  let gateActive = false;
+  let gateStepPx = Math.max(1, window.innerHeight * 3);
+  let nextGateAt = gateStepPx;
 
   continueBtn.style.display = "none";
+
+  function recalcGate() {
+    gateStepPx = Math.max(1, window.innerHeight * 3);
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    nextGateAt = (Math.floor(y / gateStepPx) + 1) * gateStepPx;
+  }
 
   function lockScroll() {
     if (locked) return;
@@ -106,6 +113,10 @@
       skipBtn.style.display = "";
       continueBtn.style.display = "none";
       revealBtn.focus();
+    } else if (mode === "result") {
+      revealBtn.style.display = "none";
+      skipBtn.style.display = "none";
+      continueBtn.style.display = "none";
     } else {
       revealBtn.style.display = "none";
       skipBtn.style.display = "none";
@@ -115,16 +126,16 @@
   }
 
   function showChoice() {
-    titleEl.textContent = "THE ABYSS";
+    titleEl.textContent = "";
     bodyEl.textContent = "You can reveal the prompt, or skip it.";
     setButtons("choice");
     setOverlay(true);
   }
 
   function showMessage(title, message) {
-    titleEl.textContent = title;
+    titleEl.textContent = "";
     bodyEl.textContent = message;
-    setButtons("continue");
+    setButtons("result");
     setOverlay(true);
   }
 
@@ -134,6 +145,25 @@
 
   function randomQuote() {
     return quotes[Math.floor(Math.random() * quotes.length)];
+  }
+
+  let afterContinue = null;
+  let timerA = null;
+  let timerB = null;
+
+  function clearTimers() {
+    if (timerA) clearTimeout(timerA);
+    if (timerB) clearTimeout(timerB);
+    timerA = null;
+    timerB = null;
+  }
+
+  function finishAndUnlock() {
+    clearTimers();
+    closeOverlay();
+    unlockScroll();
+    gateActive = false;
+    recalcGate();
   }
 
   function pickEvent() {
@@ -146,76 +176,67 @@
     return "reset";
   }
 
-  let afterContinue = null;
-
   function runReveal() {
     const evt = pickEvent();
     if (evt === "nothing") {
-      sessionStorage.setItem(gateKey, "1");
-      closeOverlay();
-      unlockScroll();
+      finishAndUnlock();
       return;
     }
 
     if (evt === "taunt") {
-      sessionStorage.setItem(gateKey, "1");
-      afterContinue = function () {
-        closeOverlay();
-        unlockScroll();
-      };
-      showMessage("TAUNT", randomQuote());
+      showMessage("", randomQuote());
+      timerA = setTimeout(function () {
+        finishAndUnlock();
+      }, 5000);
       return;
     }
 
     if (evt === "nudge") {
-      sessionStorage.setItem(gateKey, "1");
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight || 1;
       const dir = Math.random() < 0.5 ? -1 : 1;
-      const delta = Math.round(docHeight * 0.12) * dir;
-      afterContinue = function () {
-        closeOverlay();
-        unlockScroll();
-        window.scrollBy(0, delta);
-      };
+      const delta = Math.round(window.innerHeight * 6) * dir;
       showMessage(
-        "SHIFT",
-        dir > 0 ? "Something pushes you onward." : "Something pulls you back."
+        "",
+        dir > 0
+          ? "The Devil wants to pull you down deeper"
+          : "God decided you are not ready for the plunge"
       );
+      timerA = setTimeout(function () {
+        finishAndUnlock();
+        window.scrollBy(0, delta);
+        recalcGate();
+      }, 5000);
       return;
     }
 
     if (evt === "fakewin") {
-      sessionStorage.setItem(gateKey, "1");
-      afterContinue = function () {
-        closeOverlay();
-        unlockScroll();
-      };
-      showMessage("YOU WIN", "Not yet.");
+      bodyEl.textContent = "YOU WON";
+      setButtons("result");
+      setOverlay(true);
+      timerA = setTimeout(function () {
+        bodyEl.textContent = "You think you can fall into the abyss through luck?";
+      }, 1500);
+      timerB = setTimeout(function () {
+        finishAndUnlock();
+      }, 5000);
       return;
     }
 
     if (evt === "glitch") {
-      sessionStorage.setItem(gateKey, "1");
       document.body.classList.add("glitching");
       setTimeout(function () {
         document.body.classList.remove("glitching");
       }, 2200);
-      afterContinue = function () {
-        closeOverlay();
-        unlockScroll();
-      };
-      showMessage("GLITCH", "The abyss blinks.");
+      showMessage("", "The abyss blinks.");
+      timerA = setTimeout(function () {
+        finishAndUnlock();
+      }, 5000);
       return;
     }
 
-    afterContinue = function () {
-      closeOverlay();
-      unlockScroll();
-      sessionStorage.removeItem(gateKey);
-      window.scrollTo(0, 0);
-    };
-    showMessage("RESET", "Return to the surface.");
+    showMessage("", "Not even the devil considers you worthy for him");
+    timerA = setTimeout(function () {
+      location.reload();
+    }, 5000);
   }
 
   revealBtn.addEventListener("click", function () {
@@ -223,9 +244,7 @@
   });
 
   skipBtn.addEventListener("click", function () {
-    sessionStorage.setItem(gateKey, "1");
-    closeOverlay();
-    unlockScroll();
+    finishAndUnlock();
   });
 
   continueBtn.addEventListener("click", function () {
@@ -233,8 +252,7 @@
     afterContinue = null;
     if (typeof fn === "function") fn();
     else {
-      closeOverlay();
-      unlockScroll();
+      finishAndUnlock();
     }
   });
 
@@ -257,20 +275,21 @@
 
   function onScroll() {
     updateBackground();
-    if (gateFired) return;
-    if (sessionStorage.getItem(gateKey) === "1") return;
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const docHeight =
-      document.documentElement.scrollHeight - window.innerHeight || 1;
-    const t = Math.min(Math.max(scrollTop / docHeight, 0), 1);
-    if (t >= 0.33) {
-      gateFired = true;
+    if (gateActive) return;
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    if (y >= nextGateAt) {
+      gateActive = true;
+      nextGateAt += gateStepPx;
       lockScroll();
       showChoice();
     }
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", updateBackground);
+  window.addEventListener("resize", function () {
+    updateBackground();
+    recalcGate();
+  });
+  recalcGate();
   onScroll();
 })();
