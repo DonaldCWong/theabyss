@@ -214,10 +214,10 @@
       setOverlay(true);
       timerA = setTimeout(function () {
         bodyEl.textContent = "You think you can fall into the abyss through luck?";
-      }, 1500);
+      }, 3000);
       timerB = setTimeout(function () {
         finishAndUnlock();
-      }, 5000);
+      }, 10000);
       return;
     }
 
