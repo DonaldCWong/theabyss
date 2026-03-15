@@ -66,12 +66,22 @@
   const revealBtn = document.getElementById("abyssReveal");
   const skipBtn = document.getElementById("abyssSkip");
   const continueBtn = document.getElementById("abyssContinue");
+  const skipModal = document.getElementById("abyssSkipModal");
+  const skipModalText = document.getElementById("abyssSkipModalText");
+  const joeAngryOverlay = document.getElementById("abyssJoeAngry");
 
   let locked = false;
+  let skipPressCount = 0;
+  let skipButtonPermanentlyDisabled = false;
+  let skipModalTimer = null;
+  let skipModalIsFourthPress = false;
   let lockedY = 0;
   let gateActive = false;
   let gateStepPx = Math.max(1, window.innerHeight * 3);
   let nextGateAt = gateStepPx;
+  let gateCount = 0;
+  const winGateIndex = Math.floor(Math.random() * 9) + 2; // 2–10: "you won" happens once per run at this gate
+  let hasSeenWin = false;
 
   continueBtn.style.display = "none";
 
@@ -110,7 +120,7 @@
   function setButtons(mode) {
     if (mode === "choice") {
       revealBtn.style.display = "";
-      skipBtn.style.display = "";
+      skipBtn.style.display = skipButtonPermanentlyDisabled ? "none" : "";
       continueBtn.style.display = "none";
       revealBtn.focus();
     } else if (mode === "result") {
@@ -167,13 +177,16 @@
   }
 
   function pickEvent() {
+    // "You won" happens exactly once per run at a random gate
+    if (gateCount === winGateIndex && !hasSeenWin) {
+      return "fakewin";
+    }
     const r = Math.random();
-    if (r < 0.22) return "nothing";
-    if (r < 0.49) return "taunt";
-    if (r < 0.69) return "nudge";
-    if (r < 0.81) return "fakewin";
-    if (r < 0.94) return "glitch";
-    return "reset";
+    if (r < 0.08) return "nothing";   // nothing happens – less often
+    if (r < 0.53) return "taunt";     // quote – more often
+    if (r < 0.78) return "nudge";     // devil/god nudge
+    if (r < 0.96) return "glitch";    // abyss blinks
+    return "reset";                   // not worthy – rare
   }
 
   function runReveal() {
@@ -192,7 +205,8 @@
     }
 
     if (evt === "nudge") {
-      const dir = Math.random() < 0.5 ? -1 : 1;
+      // God message more often, devil less often
+      const dir = Math.random() < 0.75 ? -1 : 1; // 75% god, 25% devil
       const delta = Math.round(window.innerHeight * 6) * dir;
       showMessage(
         "",
@@ -209,15 +223,16 @@
     }
 
     if (evt === "fakewin") {
+      hasSeenWin = true;
       bodyEl.textContent = "YOU WON";
       setButtons("result");
       setOverlay(true);
       timerA = setTimeout(function () {
         bodyEl.textContent = "You think you can fall into the abyss through luck?";
-      }, 3000);
+      }, 5000);   // first part 5 seconds
       timerB = setTimeout(function () {
         finishAndUnlock();
-      }, 10000);
+      }, 10000);  // next part 5 more seconds (10s total)
       return;
     }
 
@@ -243,8 +258,78 @@
     runReveal();
   });
 
-  skipBtn.addEventListener("click", function () {
-    finishAndUnlock();
+  function closeSkipModal() {
+    if (skipModalTimer) clearTimeout(skipModalTimer);
+    skipModalTimer = null;
+    skipModal.setAttribute("aria-hidden", "true");
+    skipBtn.style.display = "none";
+  }
+
+  function handleSkipPress() {
+    if (skipButtonPermanentlyDisabled) return;
+    skipPressCount += 1;
+    skipBtn.style.display = "none";
+
+    if (skipPressCount === 1) {
+      skipModalText.textContent = "Do you think you can just ignore me?";
+      skipModal.setAttribute("aria-hidden", "false");
+      skipModalTimer = setTimeout(function () {
+        closeSkipModal();
+      }, 3000);
+      return;
+    }
+
+    if (skipPressCount === 2) {
+      skipModalText.textContent = "I told you, stop trying to ignore me";
+      skipModal.setAttribute("aria-hidden", "false");
+      skipModalTimer = setTimeout(function () {
+        closeSkipModal();
+      }, 3000);
+      return;
+    }
+
+    if (skipPressCount === 3) {
+      joeAngryOverlay.setAttribute("aria-hidden", "false");
+      const scrollBackAmount = Math.round(window.innerHeight * 1);
+      setTimeout(function () {
+        joeAngryOverlay.setAttribute("aria-hidden", "true");
+        window.scrollBy(0, -scrollBackAmount);
+        recalcGate();
+        skipModalText.textContent = "I shall not be ignored like this!";
+        skipModal.setAttribute("aria-hidden", "false");
+        skipModalTimer = setTimeout(function () {
+          closeSkipModal();
+        }, 3000);
+      }, 2500);
+      return;
+    }
+
+    if (skipPressCount >= 4) {
+      skipModalIsFourthPress = true;
+      skipModalText.textContent = "Fine, have your small victory...";
+      skipModal.setAttribute("aria-hidden", "false");
+      skipModalTimer = setTimeout(function () {
+        skipModalIsFourthPress = false;
+        closeSkipModal();
+        skipButtonPermanentlyDisabled = true;
+        finishAndUnlock();
+      }, 3000);
+    }
+  }
+
+  skipBtn.addEventListener("click", handleSkipPress);
+
+  skipModal.addEventListener("click", function () {
+    if (skipModalTimer) clearTimeout(skipModalTimer);
+    skipModalTimer = null;
+    if (skipModalIsFourthPress) {
+      skipModalIsFourthPress = false;
+      closeSkipModal();
+      skipButtonPermanentlyDisabled = true;
+      finishAndUnlock();
+    } else {
+      closeSkipModal();
+    }
   });
 
   continueBtn.addEventListener("click", function () {
@@ -279,6 +364,7 @@
     const y = window.scrollY || document.documentElement.scrollTop || 0;
     if (y >= nextGateAt) {
       gateActive = true;
+      gateCount += 1;
       nextGateAt += gateStepPx;
       lockScroll();
       showChoice();

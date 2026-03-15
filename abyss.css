@@ -95,6 +95,40 @@ h1 {
 .modal-actions button:active {
   transform: translateY(0);
 }
+.skip-modal {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: none;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 10, 14, 0.95);
+  color: #f7f1f1;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 10000;
+}
+.skip-modal[aria-hidden="false"] {
+  display: block;
+}
+.joe-angry-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: #000;
+  z-index: 10001;
+}
+.joe-angry-overlay[aria-hidden="false"] {
+  display: block;
+}
+.joe-angry-overlay img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 body.glitching h1,
 body.glitching .subtitle,
 body.glitching .bottom-message {
