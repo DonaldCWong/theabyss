@@ -1,3 +1,6 @@
+import "./abyss.css";
+import joeAngryImage from "./src/assets/joe angry.png";
+
 (function () {
   if ("scrollRestoration" in window.history) {
     window.history.scrollRestoration = "manual";
@@ -70,6 +73,9 @@
   const skipModal = document.getElementById("abyssSkipModal");
   const skipModalText = document.getElementById("abyssSkipModalText");
   const joeAngryOverlay = document.getElementById("abyssJoeAngry");
+  const joeAngryImageEl = document.getElementById("abyssJoeAngryImage");
+
+  joeAngryImageEl.src = joeAngryImage;
 
   let locked = false;
   let skipPressCount = 0;
