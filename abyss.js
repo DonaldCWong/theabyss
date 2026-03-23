@@ -61,6 +61,7 @@
   ];
 
   const overlay = document.getElementById("abyssOverlay");
+  const modalEl = overlay.querySelector(".modal");
   const titleEl = document.getElementById("abyssTitle");
   const bodyEl = document.getElementById("abyssBody");
   const revealBtn = document.getElementById("abyssReveal");
@@ -76,7 +77,10 @@
   let skipModalTimer = null;
   let skipModalIsFourthPress = false;
   let lockedY = 0;
+  let previousScrollBehavior = "";
   let gateActive = false;
+  let overlayDismissOnModalClick = false;
+  let quoteVisible = false;
   let gateStepPx = Math.max(1, window.innerHeight * 3);
   let nextGateAt = gateStepPx;
   let gateCount = 0;
@@ -95,20 +99,17 @@
     if (locked) return;
     locked = true;
     lockedY = window.scrollY || document.documentElement.scrollTop || 0;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${lockedY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.width = "100%";
+    previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
   }
 
   function unlockScroll() {
     if (!locked) return;
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.left = "";
-    document.body.style.right = "";
-    document.body.style.width = "";
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
     window.scrollTo(0, lockedY);
     locked = false;
   }
@@ -135,14 +136,24 @@
     }
   }
 
+  function setOverlayDismissOnModalClick(enabled) {
+    overlayDismissOnModalClick = enabled;
+    modalEl.classList.toggle("is-clickable", enabled);
+  }
+
   function showChoice() {
+    quoteVisible = false;
+    setOverlayDismissOnModalClick(false);
     titleEl.textContent = "";
     bodyEl.textContent = "You can reveal the prompt, or skip it.";
     setButtons("choice");
     setOverlay(true);
   }
 
-  function showMessage(title, message) {
+  function showMessage(title, message, options) {
+    const dismissOnClick = Boolean(options && options.dismissOnClick);
+    quoteVisible = dismissOnClick;
+    setOverlayDismissOnModalClick(dismissOnClick);
     titleEl.textContent = "";
     bodyEl.textContent = message;
     setButtons("result");
@@ -150,6 +161,8 @@
   }
 
   function closeOverlay() {
+    quoteVisible = false;
+    setOverlayDismissOnModalClick(false);
     setOverlay(false);
   }
 
@@ -197,7 +210,7 @@
     }
 
     if (evt === "taunt") {
-      showMessage("", randomQuote());
+      showMessage("", randomQuote(), { dismissOnClick: true });
       timerA = setTimeout(function () {
         finishAndUnlock();
       }, 5000);
@@ -254,8 +267,29 @@
     }, 5000);
   }
 
-  revealBtn.addEventListener("click", function () {
+  revealBtn.addEventListener("click", function (event) {
+    event.stopPropagation();
     runReveal();
+  });
+
+  skipBtn.addEventListener("click", function (event) {
+    event.stopPropagation();
+    handleSkipPress();
+  });
+
+  continueBtn.addEventListener("click", function (event) {
+    event.stopPropagation();
+    const fn = afterContinue;
+    afterContinue = null;
+    if (typeof fn === "function") fn();
+    else {
+      finishAndUnlock();
+    }
+  });
+
+  modalEl.addEventListener("click", function () {
+    if (!overlayDismissOnModalClick || !quoteVisible) return;
+    finishAndUnlock();
   });
 
   function closeSkipModal() {
@@ -317,8 +351,6 @@
     }
   }
 
-  skipBtn.addEventListener("click", handleSkipPress);
-
   skipModal.addEventListener("click", function () {
     if (skipModalTimer) clearTimeout(skipModalTimer);
     skipModalTimer = null;
@@ -329,15 +361,6 @@
       finishAndUnlock();
     } else {
       closeSkipModal();
-    }
-  });
-
-  continueBtn.addEventListener("click", function () {
-    const fn = afterContinue;
-    afterContinue = null;
-    if (typeof fn === "function") fn();
-    else {
-      finishAndUnlock();
     }
   });
 
