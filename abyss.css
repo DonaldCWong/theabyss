@@ -45,20 +45,25 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(6px);
+  pointer-events: none;
   z-index: 9999;
 }
 .overlay[aria-hidden="false"] {
   display: flex;
 }
 .modal {
-  width: min(900px, 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(10, 10, 14, 0.86);
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+  width: min(38rem, calc(100% - 2rem));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(1px);
+  pointer-events: auto;
   padding: 1.5rem 1.25rem;
+  border-radius: 0.5rem;
   text-align: center;
+}
+.modal.is-clickable {
+  cursor: pointer;
 }
 .modal-title {
   display: none;
