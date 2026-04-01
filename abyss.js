@@ -107,14 +107,14 @@ import joeAngryImage from "./src/assets/joe angry.png";
     lockedY = window.scrollY || document.documentElement.scrollTop || 0;
     previousScrollBehavior = document.documentElement.style.scrollBehavior;
     document.documentElement.style.scrollBehavior = "auto";
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
+    document.documentElement.classList.add("is-scroll-locked");
+    document.body.classList.add("is-scroll-locked");
   }
 
   function unlockScroll() {
     if (!locked) return;
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
+    document.documentElement.classList.remove("is-scroll-locked");
+    document.body.classList.remove("is-scroll-locked");
     document.documentElement.style.scrollBehavior = previousScrollBehavior;
     window.scrollTo(0, lockedY);
     locked = false;

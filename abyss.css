@@ -14,6 +14,10 @@ body {
   background-color: #282a37;
   color: #f7f1f1;
 }
+html.is-scroll-locked,
+body.is-scroll-locked {
+  overflow: hidden;
+}
 main {
   text-align: center;
 }
