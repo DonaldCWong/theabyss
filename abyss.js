@@ -166,6 +166,14 @@ import joeAngryImage from "./src/assets/joe angry.png";
     setOverlay(true);
   }
 
+  function showTimedMessage(message, options, onTimeout, delay) {
+    showMessage("", message, options);
+    timerA = setTimeout(function () {
+      if (typeof onTimeout === "function") onTimeout();
+      else finishAndUnlock();
+    }, delay || 5000);
+  }
+
   function closeOverlay() {
     quoteVisible = false;
     setOverlayDismissOnModalClick(false);
@@ -216,10 +224,7 @@ import joeAngryImage from "./src/assets/joe angry.png";
     }
 
     if (evt === "taunt") {
-      showMessage("", randomQuote(), { dismissOnClick: true });
-      timerA = setTimeout(function () {
-        finishAndUnlock();
-      }, 5000);
+      showTimedMessage(randomQuote(), { dismissOnClick: true });
       return;
     }
 
@@ -227,17 +232,17 @@ import joeAngryImage from "./src/assets/joe angry.png";
       // God message more often, devil less often
       const dir = Math.random() < 0.75 ? -1 : 1; // 75% god, 25% devil
       const delta = Math.round(window.innerHeight * 6) * dir;
-      showMessage(
-        "",
+      showTimedMessage(
         dir > 0
           ? "The Devil wants to pull you down deeper"
-          : "God decided you are not ready for the plunge"
+          : "God decided you are not ready for the plunge",
+        null,
+        function () {
+          finishAndUnlock();
+          window.scrollBy(0, delta);
+          recalcGate();
+        }
       );
-      timerA = setTimeout(function () {
-        finishAndUnlock();
-        window.scrollBy(0, delta);
-        recalcGate();
-      }, 5000);
       return;
     }
 
@@ -260,17 +265,13 @@ import joeAngryImage from "./src/assets/joe angry.png";
       setTimeout(function () {
         document.body.classList.remove("glitching");
       }, 2200);
-      showMessage("", "The abyss blinks.");
-      timerA = setTimeout(function () {
-        finishAndUnlock();
-      }, 5000);
+      showTimedMessage("The abyss blinks.");
       return;
     }
 
-    showMessage("", "Not even the devil considers you worthy for him");
-    timerA = setTimeout(function () {
+    showTimedMessage("Not even the devil considers you worthy for him", null, function () {
       location.reload();
-    }, 5000);
+    });
   }
 
   revealBtn.addEventListener("click", function (event) {
